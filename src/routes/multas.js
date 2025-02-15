@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const Multa = require("../models/multa");
-const Notificacion = require("../models/notificacion"); // Importar modelo de notificación
+const Notificacion = require("../models/notificacion");
+const authMiddleware = require("../middlewares/authMiddleware"); // Importar el middleware
 
 module.exports = (io) => {
   // Ruta para crear una nueva multa
-  router.post("/multas", async (req, res) => {
+  router.post("/multas", authMiddleware, async (req, res) => {
     try {
       const { cantidad, torre, departamento, comentarios } = req.body;
 

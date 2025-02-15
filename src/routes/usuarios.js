@@ -2,12 +2,13 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const Usuario = require('../models/usuario');
+const authMiddleware = require('../middlewares/authMiddleware'); // Importar el middleware
 
 const SECRET_KEY = process.env.JWT_SECRET || 'secreto'; // Clave secreta para JWT
 
 const Notificacion = require('../models/notificacion');
 
-router.get('/notificaciones/:id', async (req, res) => {
+router.get('/notificaciones/:id', authMiddleware, async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.id);
     if (!usuario) {
@@ -24,7 +25,6 @@ router.get('/notificaciones/:id', async (req, res) => {
     res.status(500).json({ mensaje: 'Error al obtener notificaciones', error });
   }
 });
-
 
 // Ruta para iniciar sesión
 router.post('/login', async (req, res) => {
