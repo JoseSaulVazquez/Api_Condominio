@@ -8,6 +8,7 @@ const UsuarioSchema = new mongoose.Schema({
   rol: { type: String, required: true },
   torre: { type: String },
   departamento: { type: String },
+  tokens: [{ type: String }]  // Nuevo campo para almacenar múltiples tokens
 });
 
 module.exports = mongoose.model("Usuario", UsuarioSchema);

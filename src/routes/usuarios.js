@@ -26,7 +26,6 @@ router.get('/notificaciones/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Ruta para iniciar sesión
 router.post('/login', async (req, res) => {
   try {
     const { numero_tel, contrasena } = req.body;
@@ -36,7 +35,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ mensaje: 'Número de teléfono o contraseña incorrectos' });
     }
 
-    const token = jwt.sign({ id: usuario._id, rol: usuario.rol }, SECRET_KEY, { expiresIn: '2h' });
+    // Generar un nuevo token
+    const token = jwt.sign({ id: usuario._id, rol: usuario.rol }, SECRET_KEY, { expiresIn: '7d' });
+
+    // Almacenar el token en el array de tokens del usuario
+    usuario.tokens.push(token);
+    await usuario.save();
+
     res.status(200).json({
       id: usuario._id,
       nombre: usuario.nombre,
@@ -48,5 +53,25 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
 });
+
+
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.user.id);
+
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    // Eliminar solo el token actual
+    usuario.tokens = usuario.tokens.filter(token => token !== req.header('Authorization'));
+    await usuario.save();
+
+    res.status(200).json({ mensaje: 'Sesión cerrada correctamente' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en el servidor', error });
+  }
+});
+
 
 module.exports = router;
